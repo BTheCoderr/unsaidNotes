@@ -58,6 +58,9 @@ export function ReflectionResult({ reflection, className }: Props) {
     }
   }
 
+  const hasShare =
+    Boolean(reflection.share_card_text?.trim()) || Boolean(reflection.ai_reminder?.trim());
+
   return (
     <div className={cn("mx-auto max-w-2xl space-y-5 pb-24", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -65,14 +68,14 @@ export function ReflectionResult({ reflection, className }: Props) {
           href="/app/dashboard"
           className="text-sm font-medium text-muted hover:text-primary"
         >
-          ← Back
+          ← Library
         </Link>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/app/reflect/new"
             className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-ink shadow-sm hover:border-primary/40"
           >
-            New reflection
+            Another round
           </Link>
           <button
             type="button"
@@ -103,32 +106,41 @@ export function ReflectionResult({ reflection, className }: Props) {
       </header>
 
       <details className="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-muted">
-        <summary className="cursor-pointer font-medium text-ink">What you wrote</summary>
+        <summary className="cursor-pointer font-medium text-ink">What you first wrote</summary>
         <p className="mt-3 whitespace-pre-wrap text-pretty">{reflection.raw_input}</p>
       </details>
 
-      <Section title="Summary" body={reflection.ai_summary} copyLabel="Copy summary" />
       <Section
-        title="What I may really be feeling"
+        title={"What's really going on"}
+        body={reflection.ai_summary}
+        copyLabel="Copy summary"
+      />
+      <Section
+        title="What you might be feeling"
         body={reflection.ai_feeling}
         copyLabel="Copy feelings"
       />
-      <Section title="What I may need" body={reflection.ai_need} copyLabel="Copy needs" />
       <Section
-        title="What not to say"
+        title={"What you're probably needing"}
+        body={reflection.ai_need}
+        copyLabel="Copy needs"
+      />
+      <Section
+        title="The version not to send"
         body={reflection.ai_not_to_say}
-        copyLabel={'Copy "not to say"'}
+        copyLabel={'Copy "not to send"'}
       />
-      <Section
-        title="Repair message draft"
-        body={reflection.ai_repair_message}
-        copyLabel="Copy repair text"
-      />
-      <Section title="Boundary statement" body={reflection.ai_boundary} copyLabel="Copy boundary" />
-      <Section title="Next step" body={reflection.ai_next_step} copyLabel="Copy next step" />
+      <Section title="The better text" body={reflection.ai_repair_message} copyLabel="Copy text" />
+      <Section title="The boundary" body={reflection.ai_boundary} copyLabel="Copy boundary" />
+      <Section title="The next calm move" body={reflection.ai_next_step} copyLabel="Copy next move" />
+      <Section title="The reminder" body={reflection.ai_reminder} copyLabel="Copy reminder" />
 
-      {reflection.share_card_text ? (
-        <ShareCard shareCardText={reflection.share_card_text} reflectionId={reflection.id} />
+      {hasShare ? (
+        <ShareCard
+          shareCardText={reflection.share_card_text}
+          reminder={reflection.ai_reminder}
+          reflectionId={reflection.id}
+        />
       ) : null}
 
       <p className="text-center text-xs leading-relaxed text-muted">{UNSAID_SAFETY_NOTE}</p>

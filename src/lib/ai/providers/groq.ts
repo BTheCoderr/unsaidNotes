@@ -24,19 +24,40 @@ export function createGroqProvider(): AiProvider {
 
   return {
     async complete({ system, user }) {
-      const res = await client.chat.completions.create({
-        model,
-        temperature: 0.4,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      });
-      const content = res.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error("Groq returned empty content");
+      try {
+        const res = await client.chat.completions.create({
+          model,
+          temperature: 0.4,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+        });
+        const content = res.choices[0]?.message?.content;
+        if (!content) {
+          console.error("[groq] empty completion content", { model });
+          throw new Error("Groq returned empty content");
+        }
+        return content;
+      } catch (err: unknown) {
+        const e = err as {
+          status?: number;
+          message?: string;
+          error?: { message?: string };
+        };
+        const safeMessage =
+          typeof e?.message === "string"
+            ? e.message.slice(0, 240)
+            : typeof e?.error?.message === "string"
+              ? e.error.message.slice(0, 240)
+              : "request_failed";
+        console.error("[groq] chat.completions failed", {
+          model,
+          status: e?.status,
+          message: safeMessage,
+        });
+        throw err;
       }
-      return content;
     },
   };
 }

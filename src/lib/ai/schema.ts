@@ -12,6 +12,8 @@ export const aiReflectionSchema = z.object({
   boundary: z.string(),
   nextStep: z.string(),
   shareCardText: z.string(),
+  /** One memorable line to carry with them (repair ritual / saved reminder). */
+  reminder: z.string(),
   safetyNote: z.string(),
 });
 

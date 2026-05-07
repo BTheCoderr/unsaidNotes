@@ -88,6 +88,27 @@ npm start
 4. In Supabase, add your production `/auth/callback` URL to **Redirect URLs** and set **Site URL** to production.
 5. Run `npm run build` locally or rely on CI to verify.
 
+### Netlify (Next.js App Router)
+
+Netlify’s [Next.js runtime](https://docs.netlify.com/frameworks/next-js/overview/) runs Route Handlers such as `POST /api/reflect` the same way as other Next hosts, as long as the site is built as a Next.js project (no custom adapter needed for standard `src/app/api/**/route.ts`).
+
+**Build environment**
+
+| Variable | Required | Notes |
+|----------|-----------|--------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Same as local |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | At least one must be set |
+| `AI_PROVIDER` | Yes | e.g. `groq` |
+| `GROQ_API_KEY` | If `AI_PROVIDER=groq` | Missing key returns JSON `{ code: "missing_env" }`, not a crash |
+| `GROQ_MODEL` | No | Defaults in code to `llama-3.1-8b-instant` |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | If `AI_PROVIDER=openai` | |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | If `AI_PROVIDER=anthropic` | |
+| `NEXT_PUBLIC_SITE_URL` | Recommended | Production origin for metadata and auth flows |
+
+Apply **all** SQL migrations in Supabase for the linked project (including `002_ai_reminder.sql`). If `ai_reminder` is missing in production, inserts from `/api/reflect` fail with HTTP 500 and response `code` **`db_insert_failed`**; Netlify/build logs and function logs will show a hint to run migration 002.
+
+**Debugging `POST /api/reflect`:** responses include a temporary **`code`** field: `missing_env`, `auth_failed`, `rate_limited`, `validation_failed`, `ai_failed`, `db_insert_failed`. User content and API keys are never returned. Check Netlify function logs for `console.error` lines prefixed with `[api/reflect]` or `[groq]`.
+
 See `docs/LAUNCH_CHECKLIST.md` before go-live.
 
 ## License

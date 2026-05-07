@@ -1,9 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { reflectJsonError } from "@/lib/api/reflect-errors";
 import { generateReflection } from "@/lib/ai";
+import { getReflectAiEnvViolation } from "@/lib/ai/env-check";
 import { REFLECTION_CATEGORIES } from "@/lib/constants";
 import { consumeReflectRateLimit } from "@/lib/rate-limit-reflect";
+import { getSupabaseBrowserConfig } from "@/lib/supabase/env";
 import { getSupabaseAndUserForApi } from "@/lib/supabase/mobile-bearer-client";
 import type { ReflectionRow } from "@/types/database.types";
 
@@ -18,25 +21,60 @@ const bodySchema = z.object({
   intensity: z.number().int().min(1).max(5).optional().nullable(),
 });
 
+function safeErrorMessage(err: unknown, maxLen = 240): string {
+  if (err instanceof Error && typeof err.message === "string") {
+    return err.message.slice(0, maxLen);
+  }
+  return "unknown_error";
+}
+
+function isLikelyMissingAiReminderColumn(error: {
+  code?: string;
+  message?: string | null;
+}): boolean {
+  const msg = (error.message ?? "").toLowerCase();
+  return (
+    msg.includes("ai_reminder") ||
+    (msg.includes("column") && msg.includes("does not exist")) ||
+    error.code === "42703"
+  );
+}
+
 export async function POST(request: NextRequest) {
+  try {
+    getSupabaseBrowserConfig();
+  } catch (e) {
+    console.error("[api/reflect] missing_env supabase", safeErrorMessage(e));
+    return reflectJsonError(
+      "Server is not fully configured. Try again later.",
+      "missing_env",
+      503,
+    );
+  }
+
   let supabase;
   let user;
   try {
     const ctx = await getSupabaseAndUserForApi(request);
     supabase = ctx.supabase;
     user = ctx.user;
-  } catch {
-    return NextResponse.json({ error: SESSION_ERROR }, { status: 401 });
+  } catch (err) {
+    const msg = safeErrorMessage(err);
+    if (msg === "UNAUTHORIZED") {
+      console.error("[api/reflect] auth_failed");
+    } else {
+      console.error("[api/reflect] auth_failed unexpected", msg);
+    }
+    return reflectJsonError(SESSION_ERROR, "auth_failed", 401);
   }
 
   const limit = consumeReflectRateLimit(user.id);
   if (!limit.ok) {
-    return NextResponse.json(
-      { error: `Too many reflections. Try again in ${limit.retryAfterSec} seconds.` },
-      {
-        status: 429,
-        headers: { "Retry-After": String(limit.retryAfterSec) },
-      },
+    return reflectJsonError(
+      `Too many reflections. Try again in ${limit.retryAfterSec} seconds.`,
+      "rate_limited",
+      429,
+      { headers: { "Retry-After": String(limit.retryAfterSec) } },
     );
   }
 
@@ -44,7 +82,7 @@ export async function POST(request: NextRequest) {
   try {
     json = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return reflectJsonError("Invalid JSON body", "validation_failed", 400);
   }
 
   const parsed = bodySchema.safeParse(json);
@@ -56,10 +94,20 @@ export async function POST(request: NextRequest) {
       flat.fieldErrors.intensity?.[0] ??
       flat.fieldErrors.personContext?.[0] ??
       "Invalid request";
-    return NextResponse.json({ error: msg }, { status: 400 });
+    return reflectJsonError(msg, "validation_failed", 400);
   }
 
   const { rawInput, category, personContext, intensity } = parsed.data;
+
+  const aiEnvViolation = getReflectAiEnvViolation();
+  if (aiEnvViolation) {
+    console.error("[api/reflect] missing_env ai", { missing: aiEnvViolation });
+    return reflectJsonError(
+      "Server is not fully configured. Try again later.",
+      "missing_env",
+      503,
+    );
+  }
 
   let ai;
   try {
@@ -70,10 +118,14 @@ export async function POST(request: NextRequest) {
       intensity: intensity ?? null,
     });
   } catch (e) {
-    console.error(e);
-    return NextResponse.json(
-      { error: "We couldn't generate your reflection. Try again in a moment." },
-      { status: 502 },
+    console.error("[api/reflect] ai_failed", {
+      message: safeErrorMessage(e),
+      name: e instanceof Error ? e.name : undefined,
+    });
+    return reflectJsonError(
+      "We couldn't generate your reflection. Try again in a moment.",
+      "ai_failed",
+      502,
     );
   }
 
@@ -94,15 +146,22 @@ export async function POST(request: NextRequest) {
       ai_boundary: ai.boundary,
       ai_next_step: ai.nextStep,
       share_card_text: ai.shareCardText,
+      ai_reminder: ai.reminder,
     })
     .select("*")
     .single();
 
   if (error || !data) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Your reflection was generated but could not be saved." },
-      { status: 500 },
+    const missingCol = error ? isLikelyMissingAiReminderColumn(error) : false;
+    console.error("[api/reflect] db_insert_failed", {
+      code: error?.code,
+      message: error?.message?.slice(0, 300),
+      hint: missingCol ? "apply_supabase_migration_002_ai_reminder" : undefined,
+    });
+    return reflectJsonError(
+      "Your reflection was generated but could not be saved.",
+      "db_insert_failed",
+      500,
     );
   }
 

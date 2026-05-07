@@ -15,13 +15,14 @@ export default async function NewReflectionPage() {
     <div className="space-y-8">
       <div>
         <Link href="/app/dashboard" className="text-sm font-medium text-muted hover:text-primary">
-          ← Back to reflections
+          ← Back to library
         </Link>
         <h1 className="font-display mt-4 text-2xl font-bold text-ink sm:text-3xl">
-          New reflection
+          Say it here first.
         </h1>
-        <p className="mt-2 text-sm text-muted">
-          Write freely. You can edit tone later—but start with honesty.
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
+          Write the version you probably should not send. Unsaid Notes will help you slow it down,
+          understand what you really mean, and turn it into something clearer.
         </p>
       </div>
       <ReflectionForm />

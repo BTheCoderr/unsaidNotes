@@ -8,17 +8,18 @@ import { SaveShareCardButton } from "@/components/SaveShareCardButton";
 import { cn } from "@/lib/utils";
 
 type ShareCardProps = {
-  shareCardText: string;
+  shareCardText: string | null | undefined;
+  reminder: string | null | undefined;
   reflectionId: string;
   className?: string;
 };
 
-export function ShareCard({ shareCardText, reflectionId, className }: ShareCardProps) {
-  const trimmed = shareCardText.trim();
+export function ShareCard({ shareCardText, reminder, reflectionId, className }: ShareCardProps) {
+  const displayLine = (reminder?.trim() || shareCardText?.trim() || "").trim();
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  if (!trimmed) return null;
+  if (!displayLine) return null;
 
   async function handleDownloadPng() {
     setDownloadError(null);
@@ -44,7 +45,7 @@ export function ShareCard({ shareCardText, reflectionId, className }: ShareCardP
 
   const fullText = [
     "Unsaid Notes",
-    trimmed,
+    displayLine,
     "Say it here before you say it out loud.",
     "Reflection tool, not therapy or crisis support.",
   ].join("\n\n");
@@ -77,7 +78,7 @@ export function ShareCard({ shareCardText, reflectionId, className }: ShareCardP
           <p className="sr-only">Share card preview</p>
 
           <p className="mt-6 whitespace-pre-wrap text-pretty text-base font-medium leading-relaxed text-ink md:text-lg">
-            {trimmed}
+            {displayLine}
           </p>
 
           <p className="mt-6 text-sm font-medium italic text-muted">
@@ -107,7 +108,7 @@ export function ShareCard({ shareCardText, reflectionId, className }: ShareCardP
         </button>
         <SaveShareCardButton
           reflectionId={reflectionId}
-          shareCardText={trimmed}
+          shareCardText={displayLine}
           className="w-full justify-center rounded-xl py-3 sm:w-auto sm:py-2.5"
         />
       </div>

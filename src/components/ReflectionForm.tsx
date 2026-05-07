@@ -51,13 +51,13 @@ export function ReflectionForm({ className }: { className?: string }) {
         return;
       }
       if (body.reflection?.id) {
-        setSuccessHint("Saved — opening your reflection…");
+        setSuccessHint("Opening your saved note…");
         navigated = true;
         router.push(`/app/reflect/${body.reflection.id}`);
         router.refresh();
         return;
       }
-      setError("Reflection saved but no link returned. Check your journal.");
+      setError("Reflection saved but no link returned. Check your library.");
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -77,19 +77,21 @@ export function ReflectionForm({ className }: { className?: string }) {
 
       <div className="space-y-2">
         <label htmlFor="thoughts" className="text-sm font-medium text-ink">
-          What&apos;s on your mind?
+          The draft you&apos;re sitting with
         </label>
         <textarea
           id="thoughts"
           value={rawInput}
           onChange={(e) => setRawInput(e.target.value)}
           rows={8}
-          placeholder="Type the messy version. No judgment here—just honesty."
+          placeholder="Say the messy part out loud here—before it goes anywhere else."
           className="w-full resize-y rounded-2xl border border-border bg-card px-4 py-3 text-base text-ink shadow-sm outline-none ring-primary/30 placeholder:text-muted focus:ring-2"
           required
         />
         {emptyInput ? (
-          <p className="text-xs text-muted">Add a few sentences to get started—the more honest, the clearer the reflection.</p>
+          <p className="text-xs text-muted">
+            A few real lines are enough. Honesty beats polish at this step.
+          </p>
         ) : null}
       </div>
 
@@ -131,13 +133,13 @@ export function ReflectionForm({ className }: { className?: string }) {
           disabled={loading || !rawInput.trim()}
           className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-md transition hover:bg-primary/90 disabled:opacity-50"
         >
-          {loading ? "Reflecting…" : "Reflect"}
+          {loading ? "Cooling it down…" : "Help me say this better"}
         </button>
         <Link
           href="/app/dashboard"
           className="text-center text-sm font-medium text-muted hover:text-primary sm:text-right"
         >
-          Cancel
+          Back to library
         </Link>
       </div>
     </form>

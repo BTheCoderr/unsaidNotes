@@ -8,8 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { href: "/app/dashboard", label: "Home" },
-  { href: "/app/reflect/new", label: "Reflect" },
+  { href: "/app/dashboard", label: "Library" },
+  { href: "/app/reflect/new", label: "Say it first" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

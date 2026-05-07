@@ -13,6 +13,7 @@ export type ReflectionRow = {
   ai_repair_message: string | null;
   ai_boundary: string | null;
   ai_next_step: string | null;
+  ai_reminder: string | null;
   share_card_text: string | null;
   is_favorite: boolean;
   created_at: string;

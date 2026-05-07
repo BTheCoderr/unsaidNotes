@@ -12,7 +12,7 @@ type Props = {
 export function CategoryPicker({ value, onChange, className }: Props) {
   return (
     <div className={cn("space-y-2", className)}>
-      <p className="text-sm font-medium text-ink">Category</p>
+      <p className="text-sm font-medium text-ink">What does this feel like right now?</p>
       <div className="flex flex-wrap gap-2">
         {REFLECTION_CATEGORIES.map((cat) => {
           const selected = cat === value;
@@ -22,7 +22,7 @@ export function CategoryPicker({ value, onChange, className }: Props) {
               type="button"
               onClick={() => onChange(cat)}
               className={cn(
-                "rounded-full border px-3 py-1.5 text-left text-xs font-medium transition sm:text-sm",
+                "max-w-full rounded-full border px-3 py-2 text-left text-xs font-medium leading-snug transition sm:text-sm",
                 selected
                   ? "border-primary bg-primary text-white shadow-sm"
                   : "border-border bg-card text-ink hover:border-primary/40",
