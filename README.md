@@ -33,6 +33,7 @@ Optional:
 | Variable | Purpose |
 |----------|---------|
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL for metadata / OG (e.g. `https://yourdomain.com`) |
+| `DEBUG_ENDPOINTS_ENABLED` | Set to `true` in `.env.local` only to enable `/api/debug/*` (omit in production) |
 
 ```bash
 npm run dev
@@ -104,6 +105,7 @@ Netlify’s [Next.js runtime](https://docs.netlify.com/frameworks/next-js/overvi
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | If `AI_PROVIDER=openai` | |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | If `AI_PROVIDER=anthropic` | |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Production origin for metadata and auth flows |
+| `DEBUG_ENDPOINTS_ENABLED` | No | Set to `true` only while diagnosing; **unset or `false` in production** so `/api/debug/*` returns 404 |
 
 **Netlify production checklist (common 502 / stale UI causes)**
 
@@ -114,7 +116,19 @@ Netlify’s [Next.js runtime](https://docs.netlify.com/frameworks/next-js/overvi
 
 If `ai_reminder` is missing in production, function logs may include a hint to apply migration 002.
 
-**Debugging `POST /api/reflect`:** responses include a temporary **`code`** field: `missing_env`, `auth_failed`, `rate_limited`, `validation_failed`, `ai_failed`, `db_insert_failed`. User content and API keys are never returned. Check Netlify function logs for `console.error` lines prefixed with `[api/reflect]` or `[groq]`.
+**Debugging `POST /api/reflect`:** responses use `{ "ok": false, "code", "message" }` (and successes include `"ok": true`). Check Netlify function logs for lines like `[api/reflect] missing_env`.
+
+### Production debug (temporary)
+
+Debug routes respond with **404** unless the **server** env var `DEBUG_ENDPOINTS_ENABLED` is exactly `true` (trimmed, case-insensitive). Set it in `.env.local` for local troubleshooting only. **In production (e.g. Netlify), leave it unset or set `DEBUG_ENDPOINTS_ENABLED=false`** after you finish debugging so `/api/debug/env` and `/api/debug/db` stay disabled.
+
+When enabled:
+
+1. **`GET /api/debug/env`** — Confirms presence of public Supabase URL, client key (anon **or** publishable counts for `NEXT_PUBLIC_SUPABASE_ANON_KEY`), `GROQ_API_KEY`, `AI_PROVIDER`, resolved `GROQ_MODEL`, and optional `NEXT_PUBLIC_SITE_URL` / `NEXT_PUBLIC_APP_URL`. Returns only booleans and safe metadata.
+2. **`GET /api/debug/db`** — **While logged in** in the browser (same origin so session cookies apply), open `/api/debug/db`. Confirms `reflections` is readable and the `ai_reminder` column exists. If the column is missing, response includes `code: "missing_ai_reminder_column"` and points to `002_ai_reminder.sql`.
+3. **Netlify** — **Functions** logs for `console.error` tags: `[api/reflect]`, `[groq]`, `[api/debug/db]`.
+
+Remove `/api/debug/*` entirely before a public launch if you prefer not to ship the routes at all; otherwise keep `DEBUG_ENDPOINTS_ENABLED` off in production.
 
 See `docs/LAUNCH_CHECKLIST.md` before go-live.
 

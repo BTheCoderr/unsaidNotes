@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 const nav = [
   { href: "/app/dashboard", label: "Library" },
   { href: "/app/reflect/new", label: "Say it first" },
+  { href: "/app/settings/privacy", label: "Privacy" },
+  { href: "/feedback", label: "Feedback" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -33,7 +35,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               const active =
                 item.href === "/app/dashboard"
                   ? pathname === "/app/dashboard"
-                  : pathname.startsWith("/app/reflect");
+                  : item.href === "/app/settings/privacy"
+                    ? pathname.startsWith("/app/settings")
+                    : item.href === "/feedback"
+                      ? pathname === "/feedback"
+                      : pathname.startsWith("/app/reflect");
               return (
                 <Link
                   key={item.href}

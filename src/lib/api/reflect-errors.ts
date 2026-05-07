@@ -8,9 +8,10 @@ export type ReflectErrorCode =
   | "ai_failed"
   | "db_insert_failed";
 
-type ReflectErrorBody = {
-  error: string;
+export type ReflectErrorBody = {
+  ok: false;
   code: ReflectErrorCode;
+  message: string;
 };
 
 export function reflectJsonError(
@@ -19,6 +20,6 @@ export function reflectJsonError(
   status: number,
   init?: ResponseInit,
 ): NextResponse<ReflectErrorBody> {
-  const body: ReflectErrorBody = { error: message, code };
+  const body: ReflectErrorBody = { ok: false, code, message };
   return NextResponse.json(body, { ...init, status });
 }

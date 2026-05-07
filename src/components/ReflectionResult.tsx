@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { ShareCard } from "@/components/ShareCard";
 import type { ReflectionRow } from "@/types/database.types";
+import { trackClientEvent } from "@/lib/analytics/client-track";
 import { UNSAID_SAFETY_NOTE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -14,10 +15,12 @@ function Section({
   title,
   body,
   copyLabel,
+  onCopied,
 }: {
   title: string;
   body: string | null | undefined;
   copyLabel: string;
+  onCopied?: () => void;
 }) {
   const text = body?.trim();
   if (!text) return null;
@@ -30,7 +33,12 @@ function Section({
             {text}
           </p>
         </div>
-        <CopyButton text={text} idleLabel={copyLabel} className="shrink-0 rounded-xl" />
+        <CopyButton
+          text={text}
+          idleLabel={copyLabel}
+          onCopied={onCopied}
+          className="shrink-0 rounded-xl"
+        />
       </div>
     </section>
   );
@@ -58,8 +66,16 @@ export function ReflectionResult({ reflection, className }: Props) {
     }
   }
 
-  const hasShare =
-    Boolean(reflection.share_card_text?.trim()) || Boolean(reflection.ai_reminder?.trim());
+  const showShareSection =
+    Boolean(reflection.share_card_text?.trim()) ||
+    Boolean(reflection.ai_reminder?.trim()) ||
+    Boolean(reflection.ai_repair_message?.trim()) ||
+    Boolean(reflection.ai_boundary?.trim());
+
+  const analyticsMeta = {
+    category: reflection.category,
+    intensity: reflection.intensity,
+  };
 
   return (
     <div className={cn("mx-auto max-w-2xl space-y-5 pb-24", className)}>
@@ -130,15 +146,34 @@ export function ReflectionResult({ reflection, className }: Props) {
         body={reflection.ai_not_to_say}
         copyLabel={'Copy "not to send"'}
       />
-      <Section title="The better text" body={reflection.ai_repair_message} copyLabel="Copy text" />
-      <Section title="The boundary" body={reflection.ai_boundary} copyLabel="Copy boundary" />
+      <Section
+        title="The better text"
+        body={reflection.ai_repair_message}
+        copyLabel="Copy text"
+        onCopied={() => trackClientEvent("repair_message_copied", analyticsMeta)}
+      />
+      <Section
+        title="The boundary"
+        body={reflection.ai_boundary}
+        copyLabel="Copy boundary"
+        onCopied={() => trackClientEvent("boundary_copied", analyticsMeta)}
+      />
       <Section title="The next calm move" body={reflection.ai_next_step} copyLabel="Copy next move" />
-      <Section title="The reminder" body={reflection.ai_reminder} copyLabel="Copy reminder" />
+      <Section
+        title="The reminder"
+        body={reflection.ai_reminder}
+        copyLabel="Copy reminder"
+        onCopied={() => trackClientEvent("share_card_copied", analyticsMeta)}
+      />
 
-      {hasShare ? (
+      {showShareSection ? (
         <ShareCard
           shareCardText={reflection.share_card_text}
           reminder={reflection.ai_reminder}
+          repairMessage={reflection.ai_repair_message}
+          boundary={reflection.ai_boundary}
+          analyticsCategory={reflection.category}
+          analyticsIntensity={reflection.intensity}
           reflectionId={reflection.id}
         />
       ) : null}

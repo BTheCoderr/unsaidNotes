@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { BeforeYouWriteNotice } from "@/components/BeforeYouWriteNotice";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { IntensitySelector } from "@/components/IntensitySelector";
 import { REFLECTION_CATEGORIES, type ReflectionCategory } from "@/lib/constants";
+import { trackClientEvent } from "@/lib/analytics/client-track";
 import { cn } from "@/lib/utils";
 
 export function ReflectionForm({ className }: { className?: string }) {
@@ -19,6 +21,16 @@ export function ReflectionForm({ className }: { className?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [successHint, setSuccessHint] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    trackClientEvent("reflection_started", {
+      category,
+      intensity,
+      success: true,
+    });
+    // Once per mount; intentional empty deps (initial category / intensity only).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +50,7 @@ export function ReflectionForm({ className }: { className?: string }) {
         }),
       });
 
-      let body: { error?: string; reflection?: { id: string } };
+      let body: { ok?: boolean; message?: string; error?: string; reflection?: { id: string } };
       try {
         body = (await res.json()) as typeof body;
       } catch {
@@ -47,7 +59,7 @@ export function ReflectionForm({ className }: { className?: string }) {
       }
 
       if (!res.ok) {
-        setError(body.error ?? "Something went wrong.");
+        setError(body.message ?? body.error ?? "Something went wrong.");
         return;
       }
       if (body.reflection?.id) {
@@ -74,6 +86,8 @@ export function ReflectionForm({ className }: { className?: string }) {
       className={cn("mx-auto max-w-2xl space-y-6", className)}
     >
       <DisclaimerBanner />
+
+      <BeforeYouWriteNotice />
 
       <div className="space-y-2">
         <label htmlFor="thoughts" className="text-sm font-medium text-ink">

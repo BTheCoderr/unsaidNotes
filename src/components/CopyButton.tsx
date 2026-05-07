@@ -8,15 +8,18 @@ type CopyButtonProps = {
   text: string;
   className?: string;
   idleLabel?: string;
+  /** Fires only after a successful clipboard write; do not pass user content here. */
+  onCopied?: () => void;
 };
 
-export function CopyButton({ text, className, idleLabel = "Copy" }: CopyButtonProps) {
+export function CopyButton({ text, className, idleLabel = "Copy", onCopied }: CopyButtonProps) {
   const [state, setState] = useState<"idle" | "copied" | "error">("idle");
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(text);
       setState("copied");
+      onCopied?.();
       setTimeout(() => setState("idle"), 2000);
     } catch {
       setState("error");

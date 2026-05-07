@@ -19,3 +19,27 @@ export type ReflectionRow = {
   created_at: string;
   updated_at: string;
 };
+
+/** Privacy-safe analytics rows (see `app_events` migration). */
+export type AppEventRow = {
+  id: string;
+  user_id: string;
+  event_name: string;
+  category: string | null;
+  intensity: number | null;
+  success: boolean | null;
+  error_code: string | null;
+  created_at: string;
+};
+
+/** `tester_feedback` migration — optional `user_id` when submitter was logged in. */
+export type TesterFeedbackRow = {
+  id: string;
+  user_id: string | null;
+  useful: boolean;
+  better_text_sendable: boolean;
+  use_again: boolean;
+  felt_off: string | null;
+  email: string | null;
+  created_at: string;
+};

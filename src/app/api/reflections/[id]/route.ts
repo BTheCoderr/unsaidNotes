@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSupabaseAndUserForApi } from "@/lib/supabase/mobile-bearer-client";
+import { trackAppEvent } from "@/lib/analytics/track-app-event";
 import type { ReflectionRow } from "@/types/database.types";
 
 const SESSION_ERROR = "Your session expired. Please sign in again.";
@@ -85,6 +86,12 @@ export async function DELETE(request: NextRequest, ctx: Ctx) {
   if (!data?.length) {
     return NextResponse.json({ error: "Reflection not found." }, { status: 404 });
   }
+
+  void trackAppEvent(supabase, {
+    eventName: "reflection_deleted",
+    userId: user.id,
+    success: true,
+  });
 
   return NextResponse.json({ ok: true });
 }
