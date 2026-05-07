@@ -105,7 +105,14 @@ Netlify’s [Next.js runtime](https://docs.netlify.com/frameworks/next-js/overvi
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | If `AI_PROVIDER=anthropic` | |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Production origin for metadata and auth flows |
 
-Apply **all** SQL migrations in Supabase for the linked project (including `002_ai_reminder.sql`). If `ai_reminder` is missing in production, inserts from `/api/reflect` fail with HTTP 500 and response `code` **`db_insert_failed`**; Netlify/build logs and function logs will show a hint to run migration 002.
+**Netlify production checklist (common 502 / stale UI causes)**
+
+1. **Deploy the latest commit** — confirm the connected Git branch and that the latest build finished successfully.
+2. **Environment variables** — in **Site configuration → Environment variables**, set `GROQ_API_KEY` when using Groq (and the rest of the table above). A missing Groq key yields `{ "code": "missing_env" }` from `/api/reflect` once this code is live.
+3. **Supabase** — run **all** migrations on the production project, including `supabase/migrations/002_ai_reminder.sql`. Without `ai_reminder`, saves fail with `{ "code": "db_insert_failed" }`.
+4. **Clear cache** — in **Deploys**, use **Trigger deploy → Clear cache and deploy site** so the CDN serves fresh HTML/JS after a fix.
+
+If `ai_reminder` is missing in production, function logs may include a hint to apply migration 002.
 
 **Debugging `POST /api/reflect`:** responses include a temporary **`code`** field: `missing_env`, `auth_failed`, `rate_limited`, `validation_failed`, `ai_failed`, `db_insert_failed`. User content and API keys are never returned. Check Netlify function logs for `console.error` lines prefixed with `[api/reflect]` or `[groq]`.
 
