@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:ital,wght@0,400..700;1,400..700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #faf7f2;
+  --card: #ffffff;
+  --primary: #7c3aed;
+  --secondary: #f97316;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --border: #e7ddd3;
+  --danger: #dc2626;
+}
+
+body {
+  @apply bg-background text-ink antialiased;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: "Fraunces", "Plus Jakarta Sans", serif;
+}

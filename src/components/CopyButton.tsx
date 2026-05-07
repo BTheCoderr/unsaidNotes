@@ -1,0 +1,42 @@
+"use client";
+
+import { useState } from "react";
+
+import { cn } from "@/lib/utils";
+
+type CopyButtonProps = {
+  text: string;
+  className?: string;
+  idleLabel?: string;
+};
+
+export function CopyButton({ text, className, idleLabel = "Copy" }: CopyButtonProps) {
+  const [state, setState] = useState<"idle" | "copied" | "error">("idle");
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setState("copied");
+      setTimeout(() => setState("idle"), 2000);
+    } catch {
+      setState("error");
+      setTimeout(() => setState("idle"), 2000);
+    }
+  }
+
+  const label =
+    state === "copied" ? "Copied" : state === "error" ? "Try again" : idleLabel;
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className={cn(
+        "inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:border-primary/40 hover:text-primary",
+        className,
+      )}
+    >
+      {label}
+    </button>
+  );
+}

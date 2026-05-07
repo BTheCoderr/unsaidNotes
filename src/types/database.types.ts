@@ -1,0 +1,20 @@
+export type ReflectionRow = {
+  id: string;
+  user_id: string;
+  title: string | null;
+  raw_input: string;
+  category: string;
+  person_context: string | null;
+  intensity: number | null;
+  ai_summary: string | null;
+  ai_feeling: string | null;
+  ai_need: string | null;
+  ai_not_to_say: string | null;
+  ai_repair_message: string | null;
+  ai_boundary: string | null;
+  ai_next_step: string | null;
+  share_card_text: string | null;
+  is_favorite: boolean;
+  created_at: string;
+  updated_at: string;
+};
