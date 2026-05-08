@@ -223,7 +223,11 @@ export function ShareCard({
       </p>
 
       {hasCardPreview ? (
-        <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Card style">
+        <div
+          className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3"
+          role="group"
+          aria-label="Card style"
+        >
           {STYLE_OPTIONS.map(({ id, label }) => (
             <button
               key={id}
@@ -231,7 +235,7 @@ export function ShareCard({
               onClick={() => setCardStyle(id)}
               aria-pressed={cardStyle === id}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm font-medium transition",
+                "min-h-12 rounded-full border px-4 py-2.5 text-sm font-medium transition sm:min-h-10 sm:py-2",
                 cardStyle === id
                   ? "border-primary bg-primary text-white shadow-sm"
                   : "border-border bg-card text-ink hover:border-primary/40",
@@ -254,12 +258,12 @@ export function ShareCard({
 
       <div className="mt-5 flex flex-col gap-3">
         <p className="text-xs font-medium text-muted">Copy</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {reminderCopyText ? (
             <CopyButton
               text={reminderCopyText}
               idleLabel="Copy reminder"
-              className="rounded-xl px-4 py-2.5"
+              className="min-h-12 w-full justify-center rounded-xl px-4 py-2.5 sm:w-auto sm:min-h-10"
               onCopied={() => trackClientEvent("share_card_copied", copyMeta)}
             />
           ) : null}
@@ -267,7 +271,7 @@ export function ShareCard({
             <CopyButton
               text={repairCopy}
               idleLabel="Copy better text"
-              className="rounded-xl px-4 py-2.5"
+              className="min-h-12 w-full justify-center rounded-xl px-4 py-2.5 sm:w-auto sm:min-h-10"
               onCopied={() => trackClientEvent("repair_message_copied", copyMeta)}
             />
           ) : null}
@@ -275,7 +279,7 @@ export function ShareCard({
             <CopyButton
               text={boundaryCopy}
               idleLabel="Copy boundary"
-              className="rounded-xl px-4 py-2.5"
+              className="min-h-12 w-full justify-center rounded-xl px-4 py-2.5 sm:w-auto sm:min-h-10"
               onCopied={() => trackClientEvent("boundary_copied", copyMeta)}
             />
           ) : null}

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { EmptyState } from "@/components/EmptyState";
+import { InstallPwaHint } from "@/components/InstallPwaHint";
 import { ReflectionCard } from "@/components/ReflectionCard";
 import { CATEGORY_BOUNDARY_MODE, CATEGORY_RISKY_TEXT } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
@@ -75,6 +76,8 @@ export default async function DashboardPage() {
           Say it first
         </Link>
       </div>
+
+      <InstallPwaHint />
 
       {reflections.length === 0 ? (
         <EmptyState

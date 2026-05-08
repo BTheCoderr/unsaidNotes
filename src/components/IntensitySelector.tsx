@@ -18,7 +18,7 @@ export function IntensitySelector({ value, onChange, className }: Props) {
         <button
           type="button"
           onClick={() => onChange(null)}
-          className="text-xs font-medium text-muted underline-offset-2 hover:text-primary hover:underline"
+          className="-mr-2 inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-xs font-medium text-muted underline-offset-2 hover:bg-primary/5 hover:text-primary hover:underline sm:min-h-0 sm:px-2 sm:py-1"
         >
           Clear
         </button>
@@ -33,7 +33,7 @@ export function IntensitySelector({ value, onChange, className }: Props) {
               type="button"
               onClick={() => onChange(n)}
               className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-xl border text-sm font-semibold transition",
+                "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-sm font-semibold transition sm:h-11 sm:w-11",
                 selected
                   ? "border-secondary bg-secondary text-white shadow-sm"
                   : "border-border bg-card text-ink hover:border-secondary/50",

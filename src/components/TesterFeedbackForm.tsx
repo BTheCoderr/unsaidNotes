@@ -25,7 +25,7 @@ function BoolChoice({
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium text-ink">{legend}</legend>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {(
           [
             { k: "yes" as const, label: "Yes" },
@@ -34,7 +34,7 @@ function BoolChoice({
         ).map(({ k, label }) => (
           <label
             key={k}
-            className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border px-5 py-2 text-sm font-medium transition sm:min-h-0 ${
+            className={`inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border px-5 py-3 text-sm font-medium transition sm:min-h-11 sm:w-auto sm:py-2 ${
               value === k
                 ? "border-primary bg-primary text-white shadow-sm"
                 : "border-border bg-card text-ink hover:border-primary/35"

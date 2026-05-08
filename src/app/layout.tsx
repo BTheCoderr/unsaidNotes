@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { PwaServiceWorkerRegister } from "@/components/PwaServiceWorkerRegister";
 
 import "./globals.css";
 
@@ -8,6 +11,17 @@ const description =
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#7C3AED" },
+    { media: "(prefers-color-scheme: dark)", color: "#5B21B6" },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -16,6 +30,14 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: siteName,
+  appleWebApp: {
+    capable: true,
+    title: siteName,
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: siteName,
     description,
@@ -23,10 +45,9 @@ export const metadata: Metadata = {
     siteName,
     locale: "en_US",
     type: "website",
-    /* Placeholder: replace with /opengraph-image.png after adding a real asset */
     images: [
       {
-        url: "/icon.svg",
+        url: "/icon",
         width: 512,
         height: 512,
         alt: siteName,
@@ -37,11 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteName,
     description,
-    images: ["/icon.svg"],
-  },
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: "/icon.svg",
+    images: ["/icon"],
   },
   robots: {
     index: true,
@@ -56,7 +73,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen touch-manipulation">
+        <OfflineBanner />
+        <PwaServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }

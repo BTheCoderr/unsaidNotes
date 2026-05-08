@@ -35,6 +35,22 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+
+  if (path === "/" && request.nextUrl.searchParams.get("pwa_launch") === "1") {
+    if (user) {
+      const dash = request.nextUrl.clone();
+      dash.pathname = "/app/dashboard";
+      dash.search = "";
+      return NextResponse.redirect(dash);
+    }
+    const clean = request.nextUrl.clone();
+    clean.searchParams.delete("pwa_launch");
+    clean.search = clean.searchParams.toString() ? `?${clean.searchParams.toString()}` : "";
+    if (clean.href !== request.nextUrl.href) {
+      return NextResponse.redirect(clean);
+    }
+  }
+
   const isProtected = path.startsWith("/app/");
 
   if (!user && isProtected) {

@@ -8,9 +8,21 @@ import { BeforeYouWriteNotice } from "@/components/BeforeYouWriteNotice";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { IntensitySelector } from "@/components/IntensitySelector";
-import { REFLECTION_CATEGORIES, type ReflectionCategory } from "@/lib/constants";
+import { CATEGORY_RISKY_TEXT, REFLECTION_CATEGORIES, type ReflectionCategory } from "@/lib/constants";
 import { trackClientEvent } from "@/lib/analytics/client-track";
 import { cn } from "@/lib/utils";
+
+const REFLECT_CONNECTION_ERROR =
+  "Connection dropped. Your draft is still here — try again when you're back online.";
+
+function isBrowserOffline(): boolean {
+  return typeof navigator !== "undefined" && !navigator.onLine;
+}
+
+/** Fictional sample for the “Use a fake example” control — not a real conversation. */
+const FAKE_EXAMPLE_PROMPT =
+  "FAKE EXAMPLE FOR TESTING — made-up message, not something you should send:\n\n" +
+  "You always do this. I'm done explaining myself. If you can't see how dismissive you've been lately, don't bother replying.";
 
 export function ReflectionForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -54,7 +66,7 @@ export function ReflectionForm({ className }: { className?: string }) {
       try {
         body = (await res.json()) as typeof body;
       } catch {
-        setError("Unexpected response from server. Try again.");
+        setError(isBrowserOffline() ? REFLECT_CONNECTION_ERROR : "Unexpected response from server. Try again.");
         return;
       }
 
@@ -71,16 +83,26 @@ export function ReflectionForm({ className }: { className?: string }) {
       }
       setError("Reflection saved but no link returned. Check your library.");
     } catch {
-      setError("Network error. Try again.");
+      setError(REFLECT_CONNECTION_ERROR);
     } finally {
       if (!navigated) setLoading(false);
     }
   }
 
+  function fillFakeExample() {
+    setError(null);
+    setSuccessHint(null);
+    setRawInput(FAKE_EXAMPLE_PROMPT);
+    setCategory(CATEGORY_RISKY_TEXT);
+    setIntensity(4);
+  }
+
   const emptyInput = rawInput.trim().length === 0;
 
   return (
+    <>
     <form
+      id="reflection-compose"
       onSubmit={onSubmit}
       aria-busy={loading}
       className={cn("mx-auto max-w-2xl space-y-6", className)}
@@ -90,16 +112,34 @@ export function ReflectionForm({ className }: { className?: string }) {
       <BeforeYouWriteNotice />
 
       <div className="space-y-2">
-        <label htmlFor="thoughts" className="text-sm font-medium text-ink">
-          The draft you&apos;re sitting with
-        </label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <label htmlFor="thoughts" className="text-sm font-medium text-ink">
+            The draft you&apos;re sitting with
+          </label>
+          <div className="flex flex-col gap-1 sm:items-end">
+            <button
+              type="button"
+              onClick={fillFakeExample}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-dashed border-primary/45 bg-primary/[0.07] px-4 py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-primary/10 sm:w-auto"
+            >
+              Use a fake example
+            </button>
+            <p className="text-center text-[0.7rem] leading-snug text-muted sm:text-right">
+              Fictional sample only — fills the box, sets &ldquo;I&apos;m about to send a risky text,&rdquo;
+              intensity 4. You still choose when to submit.
+            </p>
+          </div>
+        </div>
         <textarea
           id="thoughts"
           value={rawInput}
           onChange={(e) => setRawInput(e.target.value)}
-          rows={8}
+          rows={10}
+          autoComplete="off"
+          autoCorrect="on"
+          enterKeyHint="done"
           placeholder="Say the messy part out loud here—before it goes anywhere else."
-          className="w-full resize-y rounded-2xl border border-border bg-card px-4 py-3 text-base text-ink shadow-sm outline-none ring-primary/30 placeholder:text-muted focus:ring-2"
+          className="min-h-[12rem] w-full resize-y rounded-2xl border border-border bg-card px-4 py-3 text-base leading-relaxed text-ink shadow-sm outline-none ring-primary/30 placeholder:text-muted focus:ring-2 md:min-h-0"
           required
         />
         {emptyInput ? (
@@ -141,21 +181,46 @@ export function ReflectionForm({ className }: { className?: string }) {
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="hidden flex-col gap-3 md:flex md:flex-row md:items-center md:justify-between">
         <button
           type="submit"
           disabled={loading || !rawInput.trim()}
-          className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-md transition hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-md transition hover:bg-primary/90 disabled:opacity-50"
         >
           {loading ? "Cooling it down…" : "Help me say this better"}
         </button>
         <Link
           href="/app/dashboard"
-          className="text-center text-sm font-medium text-muted hover:text-primary sm:text-right"
+          className="min-h-12 text-center text-sm font-medium leading-none text-muted hover:text-primary md:self-center md:py-3 md:text-right"
         >
           Back to library
         </Link>
       </div>
     </form>
+
+    <div
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 px-4 pt-3 shadow-[0_-4px_24px_-8px_rgba(31,41,55,0.12)] backdrop-blur-lg md:hidden"
+      style={{
+        paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))",
+      }}
+    >
+      <div className="mx-auto flex max-w-2xl gap-3">
+        <Link
+          href="/app/dashboard"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold text-ink shadow-sm"
+        >
+          Library
+        </Link>
+        <button
+          type="submit"
+          form="reflection-compose"
+          disabled={loading || !rawInput.trim()}
+          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-primary px-6 text-base font-semibold text-white shadow-md transition hover:bg-primary/90 disabled:opacity-50"
+        >
+          {loading ? "Cooling it down…" : "Help me say this better"}
+        </button>
+      </div>
+    </div>
+    </>
   );
 }

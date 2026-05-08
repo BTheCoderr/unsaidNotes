@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { DeleteAllReflectionsCard } from "@/components/DeleteAllReflectionsCard";
+import { InstallPwaHint } from "@/components/InstallPwaHint";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PrivacySettingsPage() {
@@ -25,6 +26,8 @@ export default async function PrivacySettingsPage() {
           in Unsaid Notes—it does not end your login by itself.
         </p>
       </div>
+
+      <InstallPwaHint />
 
       <DeleteAllReflectionsCard />
 
