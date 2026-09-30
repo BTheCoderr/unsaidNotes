@@ -6,6 +6,27 @@
 **What it demonstrates:** Next.js · TypeScript · Supabase/RLS · multi-provider AI · privacy-centered product design.
 <!-- repo-intro:end -->
 
+<!-- portfolio-refresh:start -->
+## Product flow
+
+1. Write the version of the message or conversation you are not ready to send.
+2. Choose the reflection context: argument, boundary, apology, difficult conversation, or unsent note.
+3. Use the AI layer to organize what happened, what you may be feeling, what matters, and what could be said more clearly.
+4. Save the reflection privately under the signed-in user's RLS-protected account.
+5. Revisit the reflection before deciding whether anything should be sent or said at all.
+
+## Engineering highlights
+
+- privacy-centered journaling model backed by Supabase Auth + RLS
+- multi-provider AI adapter rather than one hard-coded vendor
+- structured API failure codes for deploy/debug visibility
+- production debug routes disabled by default
+- schema migrations for AI-generated reflection fields
+- explicit scope boundaries: **not therapy, legal advice, or crisis support**
+
+The product is intentionally built as a **reflection buffer**, not an AI that tells people what to do in a relationship or difficult situation.
+<!-- portfolio-refresh:end -->
+
 Private AI reflection journal for hard conversations—arguments, boundaries, apologies, and messages you should not send. **Not therapy, legal advice, or crisis support.**
 
 **Tagline:** Say it here before you say it out loud.
