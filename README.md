@@ -1,5 +1,11 @@
 # Unsaid Notes
 
+<!-- repo-intro:start -->
+**Project snapshot:** Unsaid Notes is a private AI reflection journal for processing difficult conversations, boundaries, apologies, and unsent messages before deciding what to say out loud.
+
+**What it demonstrates:** Next.js · TypeScript · Supabase/RLS · multi-provider AI · privacy-centered product design.
+<!-- repo-intro:end -->
+
 Private AI reflection journal for hard conversations—arguments, boundaries, apologies, and messages you should not send. **Not therapy, legal advice, or crisis support.**
 
 **Tagline:** Say it here before you say it out loud.
