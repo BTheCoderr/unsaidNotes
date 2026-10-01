@@ -1,5 +1,7 @@
 # Unsaid Notes
 
+[![CI](https://github.com/BTheCoderr/unsaidNotes/actions/workflows/ci.yml/badge.svg)](https://github.com/BTheCoderr/unsaidNotes/actions/workflows/ci.yml)
+
 <!-- repo-intro:start -->
 **Project snapshot:** Unsaid Notes is a private AI reflection journal for processing difficult conversations, boundaries, apologies, and unsent messages before deciding what to say out loud.
 
